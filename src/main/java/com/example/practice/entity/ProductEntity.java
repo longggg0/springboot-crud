@@ -28,6 +28,23 @@ public class ProductEntity {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+
+    // Automatically called when inserting
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    // Automatically called when updating
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+
 }
 
 
