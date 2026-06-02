@@ -5,7 +5,7 @@ import com.example.practice.dto.ProductResponseDTO;
 
 import java.util.List;
 
-public interface ProductService {
+public interface    ProductService {
 
     ProductResponseDTO createProduct(ProductRequestDTO request);
 

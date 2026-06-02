@@ -1,7 +1,7 @@
 package com.example.practice.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,25 +12,33 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalException {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
-            ResourceNotFoundException exception,
+    // ✅ Handle BusinessException (ALL custom errors)
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(
+            BusinessException exception,
             HttpServletRequest request
     ) {
+        ErrorCode errorCode = exception.getErrorCode();
+
+        log.warn("BusinessException: {}", exception.getMessage());
+
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
+                errorCode.getStatus().value(),
+                errorCode.getCode(),
                 exception.getMessage(),
                 request.getRequestURI(),
                 null
         );
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, errorCode.getStatus());
     }
 
+    // ✅ Validation Exception
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException exception,
@@ -44,28 +52,33 @@ public class GlobalException {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation failed",
+                ErrorCode.VALIDATION_FAILED.getStatus().value(),
+                ErrorCode.VALIDATION_FAILED.getCode(),
+                ErrorCode.VALIDATION_FAILED.getMessage(),
                 request.getRequestURI(),
                 validationErrors
         );
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, ErrorCode.VALIDATION_FAILED.getStatus());
     }
 
+    // ✅ Fallback Exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(
             Exception exception,
             HttpServletRequest request
     ) {
+        log.error("Unhandled exception: ", exception);
+
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ErrorCode.INTERNAL_ERROR.getStatus().value(),
+                ErrorCode.INTERNAL_ERROR.getCode(),
                 exception.getMessage(),
                 request.getRequestURI(),
                 null
         );
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, ErrorCode.INTERNAL_ERROR.getStatus());
     }
 }

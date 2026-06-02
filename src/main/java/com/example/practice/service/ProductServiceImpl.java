@@ -3,17 +3,16 @@ package com.example.practice.service;
 import com.example.practice.dto.ProductRequestDTO;
 import com.example.practice.dto.ProductResponseDTO;
 import com.example.practice.entity.ProductEntity;
-import com.example.practice.exception.ResourceNotFoundException;
+import com.example.practice.exception.BusinessException;
+import com.example.practice.exception.ErrorCode;
 import com.example.practice.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -25,14 +24,8 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
-        ProductEntity savedProduct = productRepository.save(product);
 
-
-        log.info(String.format("Created At: %s", savedProduct.getCreatedAt()));
-        log.info(String.format("Updated At: %s", savedProduct.getUpdatedAt()));
-
-
-        return mapToProductResponse(savedProduct);
+        return mapToProductResponse(productRepository.save(product));
     }
 
     @Override
@@ -45,33 +38,39 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO getProductById(Long id) {
-        ProductEntity product = findProductById(id);
-        return mapToProductResponse(product);
+        return productRepository.findById(id)
+                .map(this::mapToProductResponse)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.RESOURCE_NOT_FOUND,
+                        "Product not found with ID: " + id
+                ));
     }
 
     @Override
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO request) {
-        ProductEntity product = findProductById(id);
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.RESOURCE_NOT_FOUND,
+                        "Product not found with ID: " + id
+                ));
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
 
-        ProductEntity updatedProduct = productRepository.save(product);
-
-        return mapToProductResponse(updatedProduct);
+        return mapToProductResponse(productRepository.save(product));
     }
 
     @Override
     public void deleteProduct(Long id) {
-        ProductEntity product = findProductById(id);
-        productRepository.delete(product);
-    }
-
-    private ProductEntity findProductById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+        if (!productRepository.existsById(id)) {
+            throw new BusinessException(
+                    ErrorCode.RESOURCE_NOT_FOUND,
+                    "Product not found with ID: " + id
+            );
+        }
+        productRepository.deleteById(id);
     }
 
     private ProductResponseDTO mapToProductResponse(ProductEntity product) {
