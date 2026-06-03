@@ -16,7 +16,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalException {
 
-    // ✅ Handle BusinessException (ALL custom errors)
+    //  Handle BusinessException (ALL custom errors)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
             BusinessException exception,
@@ -38,7 +38,7 @@ public class GlobalException {
         return new ResponseEntity<>(errorResponse, errorCode.getStatus());
     }
 
-    // ✅ Validation Exception
+    //  Validation Exception
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException exception,

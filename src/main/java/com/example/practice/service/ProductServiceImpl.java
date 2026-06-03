@@ -73,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
-    private ProductResponseDTO mapToProductResponse(ProductEntity product) {
+    private ProductResponseDTO  mapToProductResponse(ProductEntity product) {
         return new ProductResponseDTO(
                 product.getId(),
                 product.getName(),

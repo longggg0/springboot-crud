@@ -1,9 +1,11 @@
 package com.example.practice.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@AllArgsConstructor
 public enum ErrorCode {
 
     RESOURCE_NOT_FOUND("RESOURCE_NOT_FOUND", "Resource not found", HttpStatus.NOT_FOUND),
@@ -14,9 +16,9 @@ public enum ErrorCode {
     private final String message;
     private final HttpStatus status;
 
-    ErrorCode(String code, String message, HttpStatus status) {
-        this.code = code;
-        this.message = message;
-        this.status = status;
-    }
+//    ErrorCode(String code, String message, HttpStatus status) {
+//        this.code = code;
+//        this.message = message;
+//        this.status = status;
+//    }
 }

@@ -1,11 +1,13 @@
 package com.example.practice.controller;
 
+import com.example.practice.ApiResponse.ApiResponse;
 import com.example.practice.dto.ProductRequestDTO;
 import com.example.practice.dto.ProductResponseDTO;
 import com.example.practice.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,11 +49,14 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProduct(
-            @PathVariable Long id
-    ) {
+    public ApiResponse<Void> deleteProduct(@PathVariable Long id) {
+
         productService.deleteProduct(id);
 
+        return new ApiResponse<>(
+                true,
+                "Delete success",
+                null
+        );
     }
 }
